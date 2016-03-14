@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+	</head>
+	<body>
+		<div ng-app="myApp" ng-controller="myCtlr" ng-init="firstName='Chandran'">
+			{{ firstName + " " + lastName}}
+			<div sankaran-Tag></div>
+			<input ng-model="myInput"></input>
+			
+			<!-- User Validation -->
+			<form name="myForm">
+				<input type="email" name="emailInp" ng-model="myEmail"></input>
+				<span ng-show="myForm.emailInp.$error.email">Please enter email in correct format</span>
+				<div>is touched - {{myForm.emailInp.$touched}}</div>
+				<div>is dirty - {{myForm.emailInp.$dirty}}</div>
+				<div>is error - {{myForm.emailInp.$error}}</div>
+				<div>is invalid - {{myForm.emailInp.$invalid}}</div>
+				<input type="submit"></input>
+			</form>
+			
+			<!-- Controller Function -->
+			{{fullName()}}
+			
+			<!-- Controller dict -->
+			<div ng-repeat="x in names | orderBy:'name' | filter:filText">
+				{{(x.name | myFilter) +" "+ x.city}} 
+			</div>
+			
+			<!-- Filters --> 
+			{{ fullName() | lowercase}}
+			{{ fullName() | uppercase}}
+			{{ rate | currency }}
+			<input type="text" placeholder="Type a value" name="filText" ng-model="filText"></input>
+			{{filText | myHexFilter}}
+			
+			<!-- $http service -->
+			{{ 'Resp Status -' + respStatus}}
+			{{ 'Resp StatusText -' + respStatusText}}
+			{{ 'Resp Config -' + respConfig}}
+			{{ 'Resp Headers -' + respHeader}}
+			<div ng-repeat="x in respData.records">
+				{{x.Name}}
+			</div>
+			
+			<!-- Table -->
+			<table>
+				<tr ng-repeat="x in respData.records">
+					<td ng-if="$even" style="font-weight:bold;">{{x.Name}}</td>
+					<td ng-if="$odd">{{x.Name}}</td>
+				</tr>
+			</table>
+			
+			<!-- Select -->
+			<select ng-model="selectedOption" ng-options="x.City for x in respData.records"></select>
+			<div>Selected Test - {{selectedOption.Name}}</div>
+			
+			<!-- Attributes -->
+			<input ng-disabled="myToggle"></input>
+			<input ng-show="myToggle"></input>
+			Check this box to enable/disable the input box - <input type="checkbox" ng-model="myToggle"></input>
+			
+			<!-- Events -->
+			<div style="border:1px solid black; height:100px; width:100px; text-align-center;" ng-mousemove="fullName()">
+				<div>{{'Mouse pointer came to this area - '+count+' times'}}</div>
+				<div>{{'x,y-'+x+','+y}}</div>
+			</div>
+		</div>
+		<script>
+			var m = angular.module('myApp',[]);
+			m.controller('myCtlr', function($scope){
+				$scope.firstName = 'Sankaran';
+				$scope.lastName = 'Nepolean';
+				$scope.myInput = 'Im a good boy';
+				$scope.fullName = function(){
+					return $scope.firstName + " " + $scope.lastName;
+				};
+				$scope.names = [
+					{name:'ABCD', city:'London'},
+					{name:'EFGH', city:'Mlysi'},
+					{name:'BFGH', city:'Canada'}
+				];
+				$scope.rate = 500;
+				$scope.myFunc1 = function(myE) {
+					$scope.x = myE.clientX;
+					$scope.y = myE.clientY;
+				};
+			});
+			m.directive('sankaranTag', function(){
+				return {
+					template : '<div>my own tag, wowww.. !!!</div>'
+				};
+			});
+			m.filter('myFilter', function(){
+				return function(x){
+					return x.toUpperCase();
+				};
+			});
+			m.service('myService', function(){
+				this.myFunc = function(x){
+					return (x && x.toString(16)) || '';
+				};
+			});
+			m.filter('myHexFilter', ['myService', function(myService){
+				return function(x){
+					return myService.myFunc(x);
+				}
+			}]);
+			m.controller('myCtlr', function($scope, $http){
+				$http.get('http://www.w3schools.com/angular/customers.php').then(function(resp){
+					$scope.respStatus =  resp.status;
+					$scope.respStatusText =  resp.statusText;
+					$scope.respConfig =  resp.config;
+					$scope.respHeaders =  resp.header;
+					$scope.respData =  resp.data;
+				});
+			});
+		</script>
+	</body>
+</html>
